@@ -44,6 +44,14 @@ impl Transaction {
         }
     }
 
+    /// Returns -amount if this is an expense, +amount if it's income
+    pub fn amount(&self) -> f32 {
+        match self.trans_type {
+            TransactionType::Expense => - self.amount,
+            TransactionType::Income => self.amount
+        }
+    }
+
     /// Gets the attached note
     pub fn note(&self) -> Option<&String> {
         self.note.as_ref()
