@@ -4,6 +4,4 @@ extern crate chrono;
 
 mod transaction;
 
-fn main() {
-    println!("Welcome to budgie!");
-}
+fn main() {}

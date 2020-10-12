@@ -1,23 +1,38 @@
 use chrono::{DateTime, Local};
 
+/// The possible types of transaction
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum TransactionType {
     Expense,
     Income
 }
 
+/// One basic transaction. Either income or expense.
+/// 
+/// Transactions need an amount and type, but other fields are optional.
 #[derive(Debug)]
 pub struct Transaction {
+    /// The currency amount of the transaction
     amount: f32,
+    /// The name of the merchant where the money was spent
     merchant: Option<String>,
     // TODO: Replace this with custom ID type?
+    /// The ID of the budget item this belongs to.
+    /// An empty item id means the transaction is "floating",
+    /// meaning it isn't (yet) associated with an item.
     item_id: Option<String>,
+    /// Optional notes about the transaction
     note: Option<String>,
+    /// Expense or Income
     trans_type: TransactionType,
+    /// The time of the transaction. This is automatically set to
+    /// the current time when the Transaction is created, in local time.
+    /// This is not correct, it will need to be changed later. I hate timezones.
     date: DateTime<Local>
 }
 
 impl Transaction {
+    /// Creates a new transaction with the given amount, as an Expense
     pub fn new(amount: f32) -> Transaction {
         Transaction {
             amount,
@@ -29,34 +44,42 @@ impl Transaction {
         }
     }
 
+    /// Gets the attached note
     pub fn note(&self) -> Option<&String> {
         self.note.as_ref()
     }
 
+    /// Sets the attached note
     pub fn set_note(&mut self, note: String) {
         self.note = Some(note);
     }
 
+    /// Gets the attached merchant
     pub fn merchant(&mut self) -> Option<&String> {
         self.merchant.as_ref()
     }
 
+    /// Sets the attached merchant
     pub fn set_merchant(&mut self, merchant: String) {
         self.merchant = Some(merchant);
     }
 
+    /// Gets the transaction type. Expense or Income
     pub fn trans_type(&self) -> TransactionType {
         self.trans_type
     }
 
+    /// Sets the transaction type
     pub fn set_trans_type(&mut self, trans_type: TransactionType) {
         self.trans_type = trans_type;
     }
 
+    /// Gets the associated budget item ID
     pub fn item_id(&self) -> Option<&String> {
         self.item_id.as_ref()
     }
 
+    /// Sets the associated budget item ID
     pub fn set_item_id(&mut self, item_id: String) {
         self.item_id = Some(item_id);
     }
