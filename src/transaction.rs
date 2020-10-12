@@ -12,6 +12,8 @@ pub enum TransactionType {
 /// Transactions need an amount and type, but other fields are optional.
 #[derive(Debug)]
 pub struct Transaction {
+    /// A unique transaction ID
+    id: String,
     /// The currency amount of the transaction
     amount: f32,
     /// The name of the merchant where the money was spent
@@ -35,6 +37,7 @@ impl Transaction {
     /// Creates a new transaction with the given amount, as an Expense
     pub fn new(amount: f32) -> Transaction {
         Transaction {
+            id: uuid::Uuid::new_v4().to_string(),
             amount,
             merchant: None,
             item_id: None,
@@ -50,6 +53,11 @@ impl Transaction {
             TransactionType::Expense => - self.amount,
             TransactionType::Income => self.amount
         }
+    }
+
+    /// Gets the transaction ID
+    pub fn id(&self) -> &str {
+        &self.id
     }
 
     /// Gets the attached note
