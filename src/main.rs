@@ -1,3 +1,9 @@
+extern crate serde;
+extern crate serde_json;
+extern crate chrono;
+
+mod transaction;
+
 fn main() {
-    println!("Hello, world!");
+    println!("Welcome to budgie!");
 }
