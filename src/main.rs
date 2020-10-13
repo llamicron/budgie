@@ -6,7 +6,4 @@ extern crate uuid;
 mod transaction;
 mod budget_item;
 
-fn main() {
-
-
-}
+fn main() {}
