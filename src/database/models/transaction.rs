@@ -1,8 +1,8 @@
 use diesel::{Queryable, Insertable};
 use diesel::data_types::PgTimestamp;
 
-use crate::schema::transactions;
-use crate::models::BudgetItem;
+use crate::database::schema::transactions;
+use crate::database::models::BudgetItem;
 
 #[derive(Identifiable, Queryable, Associations, Debug)]
 #[table_name="transactions"]

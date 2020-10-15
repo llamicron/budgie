@@ -3,6 +3,9 @@ use diesel::pg::PgConnection;
 use dotenv::dotenv;
 use std::env;
 
+mod schema;
+mod models;
+
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
 
@@ -13,7 +16,7 @@ pub fn establish_connection() -> PgConnection {
 // Delete alls records in the db
 #[allow(unused)]
 pub fn wipe() {
-    use crate::schema::{budgets, budget_items, item_groups, transactions};
+    use crate::database::schema::{budgets, budget_items, item_groups, transactions};
     let conn = establish_connection();
 
     diesel::delete(budgets::table).execute(&conn).ok();

@@ -7,11 +7,7 @@ extern crate uuid;
 extern crate diesel;
 extern crate dotenv;
 
-
-
 mod database;
-mod schema;
-mod models;
 
 fn main() {
     // use diesel::prelude::*;

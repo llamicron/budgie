@@ -1,6 +1,6 @@
 use diesel::{Insertable, Identifiable};
 
-use crate::schema::budgets;
+use crate::database::schema::budgets;
 
 #[derive(Debug, Queryable, Insertable, Identifiable)]
 #[table_name="budgets"]

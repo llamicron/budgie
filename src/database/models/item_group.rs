@@ -1,7 +1,7 @@
 use diesel::{Queryable, Insertable};
 
-use crate::models::Budget;
-use crate::schema::item_groups;
+use crate::database::models::Budget;
+use crate::database::schema::item_groups;
 
 #[derive(Queryable, Identifiable, Debug, Associations)]
 #[table_name="item_groups"]
