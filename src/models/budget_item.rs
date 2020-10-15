@@ -1,11 +1,15 @@
 use diesel::{Queryable, Insertable};
 
 use crate::schema::budget_items;
+use crate::models::ItemGroup;
 
 
-#[derive(Queryable, Identifiable)]
+#[derive(Queryable, Identifiable, Associations, Debug)]
+#[belongs_to(ItemGroup)]
+#[table_name="budget_items"]
 pub struct BudgetItem {
     pub id: i32,
+    pub item_group_id: Option<i32>,
     pub name: String,
     pub total: f64,
     pub balance: f64,
@@ -18,6 +22,7 @@ pub struct BudgetItem {
 #[table_name="budget_items"]
 pub struct NewBudgetItem<'a> {
     pub name: &'a str,
+    pub item_group_id: Option<i32>,
     pub total: f64,
     pub balance: f64,
     pub fund: bool,

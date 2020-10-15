@@ -1,12 +1,20 @@
 table! {
     budget_items (id) {
         id -> Int4,
+        item_group_id -> Nullable<Int4>,
         name -> Varchar,
         total -> Float8,
         balance -> Float8,
         fund -> Bool,
         note -> Nullable<Varchar>,
         favorite -> Bool,
+    }
+}
+
+table! {
+    item_groups (id) {
+        id -> Int4,
+        name -> Nullable<Varchar>,
     }
 }
 
@@ -25,5 +33,6 @@ joinable!(transactions -> budget_items (budget_item_id));
 
 allow_tables_to_appear_in_same_query!(
     budget_items,
+    item_groups,
     transactions,
 );

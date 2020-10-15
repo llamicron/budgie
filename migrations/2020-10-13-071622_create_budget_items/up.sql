@@ -1,5 +1,6 @@
 CREATE TABLE budget_items (
     id SERIAL PRIMARY KEY,
+    item_group_id INT,
     name VARCHAR NOT NULL,
     total DOUBLE PRECISION NOT NULL,
     balance DOUBLE PRECISION NOT NULL DEFAULT 0,
