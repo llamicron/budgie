@@ -22,6 +22,7 @@ table! {
 table! {
     item_groups (id) {
         id -> Int4,
+        budget_id -> Int4,
         name -> Nullable<Varchar>,
     }
 }
