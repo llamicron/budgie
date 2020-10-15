@@ -4,9 +4,9 @@ use diesel::data_types::PgTimestamp;
 use crate::schema::transactions;
 use crate::models::BudgetItem;
 
-#[derive(Queryable, Associations)]
-#[belongs_to(BudgetItem, foreign_key = "id")]
+#[derive(Identifiable, Queryable, Associations, Debug)]
 #[table_name="transactions"]
+#[belongs_to(BudgetItem)]
 pub struct Transaction {
     pub id: i32,
     pub amount: f64,

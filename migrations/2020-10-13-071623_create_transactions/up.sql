@@ -1,5 +1,5 @@
 CREATE TABLE transactions (
-    id INT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     amount DOUBLE PRECISION NOT NULL,
     merchant VARCHAR,
     note VARCHAR,
