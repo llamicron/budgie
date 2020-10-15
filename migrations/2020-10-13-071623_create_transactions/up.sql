@@ -3,5 +3,5 @@ CREATE TABLE transactions (
     amount DOUBLE PRECISION NOT NULL,
     merchant VARCHAR,
     note VARCHAR,
-    budget_item_id SERIAL
+    budget_item_id INT DEFAULT 0
 )

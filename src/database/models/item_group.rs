@@ -6,7 +6,7 @@ use crate::database::schema::item_groups;
 
 #[derive(Queryable, Identifiable, Debug, Associations)]
 #[table_name="item_groups"]
-#[belongs_to(Budget, Deserialize, Serialize)]
+#[belongs_to(Budget)]
 pub struct ItemGroup {
     pub id: i32,
     pub budget_id: i32,

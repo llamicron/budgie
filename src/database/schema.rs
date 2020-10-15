@@ -33,7 +33,7 @@ table! {
         amount -> Float8,
         merchant -> Nullable<Varchar>,
         note -> Nullable<Varchar>,
-        budget_item_id -> Int4,
+        budget_item_id -> Nullable<Int4>,
     }
 }
 
