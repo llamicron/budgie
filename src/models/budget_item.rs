@@ -9,7 +9,7 @@ use crate::models::ItemGroup;
 #[table_name="budget_items"]
 pub struct BudgetItem {
     pub id: i32,
-    pub item_group_id: Option<i32>,
+    pub item_group_id: i32,
     pub name: String,
     pub total: f64,
     pub balance: f64,
