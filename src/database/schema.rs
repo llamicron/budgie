@@ -34,11 +34,8 @@ table! {
         merchant -> Nullable<Varchar>,
         note -> Nullable<Varchar>,
         budget_item_id -> Int4,
-        created_at -> Timestamptz,
     }
 }
-
-joinable!(transactions -> budget_items (budget_item_id));
 
 allow_tables_to_appear_in_same_query!(
     budget_items,

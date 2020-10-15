@@ -1,10 +1,11 @@
 use diesel::{Queryable, Insertable};
+use serde::{Deserialize, Serialize};
 
 use crate::database::schema::budget_items;
 use crate::database::models::ItemGroup;
 
 
-#[derive(Queryable, Identifiable, Associations, Debug)]
+#[derive(Queryable, Identifiable, Associations, Debug, Deserialize, Serialize)]
 #[belongs_to(ItemGroup)]
 #[table_name="budget_items"]
 pub struct BudgetItem {
@@ -18,7 +19,7 @@ pub struct BudgetItem {
     pub favorite: bool
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Deserialize, Serialize)]
 #[table_name="budget_items"]
 pub struct NewBudgetItem<'a> {
     pub name: &'a str,

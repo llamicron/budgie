@@ -1,18 +1,19 @@
 use diesel::{Queryable, Insertable};
+use serde::{Deserialize, Serialize};
 
 use crate::database::models::Budget;
 use crate::database::schema::item_groups;
 
 #[derive(Queryable, Identifiable, Debug, Associations)]
 #[table_name="item_groups"]
-#[belongs_to(Budget)]
+#[belongs_to(Budget, Deserialize, Serialize)]
 pub struct ItemGroup {
     pub id: i32,
     pub budget_id: i32,
     pub name: Option<String>
 }
 
-#[derive(Insertable, Debug)]
+#[derive(Insertable, Debug, Deserialize, Serialize)]
 #[table_name="item_groups"]
 pub struct NewItemGroup<'a> {
     pub name: Option<&'a str>,

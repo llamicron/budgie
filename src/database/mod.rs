@@ -1,26 +1,42 @@
-use diesel::prelude::*;
+pub mod models;
+pub mod schema;
+
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
+use r2d2_diesel::ConnectionManager;
+use rocket::http::Status;
+use rocket::request::{self, FromRequest};
+use rocket::{Outcome, Request, State};
 use std::env;
+use std::ops::Deref;
 
-mod schema;
-mod models;
+type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
-pub fn establish_connection() -> PgConnection {
+pub fn init_pool() -> Pool {
     dotenv().ok();
-
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    PgConnection::establish(&db_url).expect(&format!("Error connecting to {}", db_url))
+    let manager = ConnectionManager::<PgConnection>::new(db_url);
+    Pool::new(manager).expect("Couldn't create database pool")
 }
 
-// Delete alls records in the db
-#[allow(unused)]
-pub fn wipe() {
-    use crate::database::schema::{budgets, budget_items, item_groups, transactions};
-    let conn = establish_connection();
+pub struct DbConn(pub r2d2::PooledConnection<ConnectionManager<PgConnection>>);
 
-    diesel::delete(budgets::table).execute(&conn).ok();
-    diesel::delete(budget_items::table).execute(&conn).ok();
-    diesel::delete(item_groups::table).execute(&conn).ok();
-    diesel::delete(transactions::table).execute(&conn).ok();
+impl<'a, 'r> FromRequest<'a, 'r> for DbConn {
+    type Error = ();
+
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<DbConn, Self::Error> {
+        let pool = request.guard::<State<Pool>>()?;
+        match pool.get() {
+            Ok(conn) => Outcome::Success(DbConn(conn)),
+            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ())),
+        }
+    }
+}
+
+impl Deref for DbConn {
+    type Target = PgConnection;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
