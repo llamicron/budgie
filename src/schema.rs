@@ -7,6 +7,16 @@ pub mod sql_types {
 }
 
 diesel::table! {
+    budgets (id) {
+        id -> Int4,
+        start_date -> Date,
+        end_date -> Date,
+        name -> Text,
+        notes -> Nullable<Text>,
+    }
+}
+
+diesel::table! {
     line_item_groups (id) {
         id -> Int4,
         name -> Text,
@@ -43,6 +53,7 @@ diesel::joinable!(line_items -> line_item_groups (group_id));
 diesel::joinable!(transactions -> line_items (line_item_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    budgets,
     line_item_groups,
     line_items,
     transactions,
