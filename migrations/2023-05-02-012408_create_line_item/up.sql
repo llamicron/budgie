@@ -1,7 +1,9 @@
+CREATE TYPE line_item_kind AS ENUM ('standard', 'debt', 'fund');
+
 CREATE TABLE line_items (
     id INTEGER PRIMARY KEY,
-    kind TEXT CHECK(kind in ('standard', 'fund', 'debt')) NOT NULL,
-    name VARCHAR,
+    kind line_item_kind NOT NULL,
+    name VARCHAR NOT NULL,
     planned REAL NOT NULL,
     balance REAL
 );

@@ -15,17 +15,18 @@
 
 use crate::schema::line_items;
 use crate::ID;
-use diesel::prelude::*;
+use diesel::{prelude::*, AsExpression};
 use diesel_derive_enum::DbEnum;
 
 #[derive(Debug, DbEnum)]
+#[ExistingTypePath = "crate::schema::sql_types::LineItemKind"]
 pub enum LineItemKind {
     Standard,
     Fund,
     Debt,
 }
 
-#[derive(Debug, Queryable, Insertable)]
+#[derive(Debug, Queryable, Identifiable, Insertable)]
 #[diesel(table_name = line_items)]
 pub struct LineItem {
     pub id: ID,
