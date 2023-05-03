@@ -55,7 +55,7 @@ pub struct NewTransaction<'a> {
 mod tests {
     use super::*;
     use crate::db;
-    use crate::line_item::{LineItem, LineItemKind};
+    use crate::model::LineItem;
     use crate::schema::line_items;
     use crate::schema::transactions;
 
@@ -69,7 +69,7 @@ mod tests {
         let db = &mut db::connect().unwrap();
         nuke(db);
 
-        let li = LineItem::create(db, &LineItemKind::Standard, "Gas", &120.0, None).unwrap();
+        let li = LineItem::default();
 
         let old_count = transactions::table.count().first::<i64>(db).unwrap();
         assert!(old_count == 0);
