@@ -2,7 +2,7 @@ use crate::error::{BudgieError, Result};
 use crate::schema::transactions;
 use diesel::prelude::*;
 
-#[derive(Debug, Queryable, Identifiable)]
+#[derive(Debug, Queryable, Identifiable, PartialEq)]
 #[diesel(table_name = transactions)]
 pub struct Transaction {
     pub id: i32,
@@ -54,7 +54,42 @@ pub struct NewTransaction<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::db;
+    use crate::line_item::{LineItem, LineItemKind};
+    use crate::schema::line_items;
+    use crate::schema::transactions;
+
+    fn nuke(db: &mut PgConnection) {
+        diesel::delete(transactions::table).execute(db).unwrap();
+        diesel::delete(line_items::table).execute(db).unwrap();
+    }
 
     #[test]
-    fn test_create_transaction() {}
+    fn test_create_transaction() {
+        let db = &mut db::connect().unwrap();
+        nuke(db);
+
+        let li = LineItem::create(db, &LineItemKind::Standard, "Gas", &120.0, None).unwrap();
+
+        let old_count = transactions::table.count().first::<i64>(db).unwrap();
+        assert!(old_count == 0);
+        let trans = Transaction::create(
+            db,
+            li.id(),
+            true,
+            &20.58,
+            "Exxon",
+            None,
+            chrono::NaiveDateTime::default(),
+        )
+        .unwrap();
+
+        let new_count = transactions::table.count().first::<i64>(db).unwrap();
+        assert!(new_count == 1);
+
+        let found_trans = transactions::table.first::<Transaction>(db).unwrap();
+        assert_eq!(found_trans, trans);
+
+        nuke(db)
+    }
 }

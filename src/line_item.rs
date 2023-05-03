@@ -13,11 +13,12 @@
 //! a starting balance of $500, and when it's used in a budget that sets is "planned" value
 //! to $75, it now has $575 in it.
 
+use crate::error::{BudgieError, Result};
 use crate::schema::line_items;
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
 
-#[derive(Debug, DbEnum)]
+#[derive(Debug, DbEnum, PartialEq)]
 #[ExistingTypePath = "crate::schema::sql_types::LineItemKind"]
 pub enum LineItemKind {
     Standard,
@@ -25,7 +26,7 @@ pub enum LineItemKind {
     Debt,
 }
 
-#[derive(Debug, Queryable, Identifiable)]
+#[derive(Debug, Queryable, Identifiable, PartialEq)]
 #[diesel(table_name = line_items)]
 pub struct LineItem {
     pub id: i32,
@@ -46,7 +47,7 @@ impl LineItem {
         name: &str,
         planned: &f32,
         balance: Option<&f32>,
-    ) -> LineItem {
+    ) -> Result<LineItem> {
         let new_line_item = NewLineItem {
             kind,
             name,
@@ -57,7 +58,7 @@ impl LineItem {
         diesel::insert_into(line_items::table)
             .values(&new_line_item)
             .get_result(conn)
-            .expect("Couldn't insert")
+            .map_err(|e| BudgieError::from(e))
     }
 }
 
@@ -74,25 +75,25 @@ struct NewLineItem<'a> {
 mod tests {
     use super::*;
     use crate::db;
-    use crate::schema::line_items::dsl::*;
+    use crate::schema::line_items;
 
     fn nuke(db: &mut PgConnection) {
-        diesel::delete(line_items).execute(db).unwrap();
+        diesel::delete(line_items::table).execute(db).unwrap();
     }
 
     #[test]
     fn test_insert_new_line_item() {
-        let db = &mut db::connect();
+        let db = &mut db::connect().unwrap();
         nuke(db);
 
-        let old_count = line_items.count().first::<i64>(db).unwrap();
-        assert!(old_count == 0);
+        let old_count = line_items::table.count().first::<i64>(db).unwrap();
+        assert_eq!(old_count, 0);
         LineItem::create(db, &LineItemKind::Standard, "Gas", &120.0, None);
-        let new_count = line_items.count().first::<i64>(db).unwrap();
-        assert!(new_count == 1);
+        let new_count = line_items::table.count().first::<i64>(db).unwrap();
+        assert_eq!(new_count, 1);
 
-        let li_it = line_items.first::<LineItem>(db).unwrap();
-        assert!(li_it.name == "Gas");
+        let li_it = line_items::table.first::<LineItem>(db).unwrap();
+        assert_eq!(li_it.name, "Gas");
 
         nuke(db);
     }
