@@ -93,17 +93,12 @@ mod tests {
     use super::*;
     use crate::db;
     use crate::model::LineItemGroup;
-    use crate::schema::{line_item_groups, line_items};
-
-    fn nuke(db: &mut PgConnection) {
-        diesel::delete(line_items::table).execute(db).unwrap();
-        diesel::delete(line_item_groups::table).execute(db).unwrap();
-    }
+    use crate::schema::line_items;
 
     #[test]
     fn test_insert_new_line_item() {
         let db = &mut db::connect().unwrap();
-        nuke(db);
+        db::nuke(db);
 
         let group = LineItemGroup::default();
 
@@ -116,13 +111,13 @@ mod tests {
         let li_it = line_items::table.first::<LineItem>(db).unwrap();
         assert_eq!(li_it.name, "Gas");
 
-        nuke(db);
+        db::nuke(db);
     }
 
     #[test]
     fn test_move_group() {
         let db = &mut db::connect().unwrap();
-        nuke(db);
+        db::nuke(db);
         let group1 = LineItemGroup::default();
         let group2 = LineItemGroup::default();
 
@@ -134,6 +129,6 @@ mod tests {
         assert_eq!(line_item.group_id, group1.id);
         line_item.move_to_group(db, &group2).unwrap();
         assert_eq!(line_item.group_id, group2.id);
-        nuke(db);
+        db::nuke(db);
     }
 }

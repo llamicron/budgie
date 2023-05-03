@@ -36,21 +36,17 @@ pub struct NewLineItemGroup<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{db, schema::line_item_groups::dsl::line_item_groups};
-
-    fn nuke(db: &mut PgConnection) {
-        diesel::delete(line_item_groups).execute(db).unwrap();
-    }
+    use crate::db;
 
     #[test]
     fn test_insert_line_item_group() {
         let db = &mut db::connect().unwrap();
-        nuke(db);
+        db::nuke(db);
 
         let group = LineItemGroup::default();
 
         assert_eq!(group.name, "New Group");
 
-        nuke(db);
+        db::nuke(db);
     }
 }

@@ -58,18 +58,12 @@ mod tests {
     use crate::model::LineItem;
     use crate::model::LineItemGroup;
     use crate::model::LineItemKind;
-    use crate::schema::line_items;
     use crate::schema::transactions;
-
-    fn nuke(db: &mut PgConnection) {
-        diesel::delete(transactions::table).execute(db).unwrap();
-        diesel::delete(line_items::table).execute(db).unwrap();
-    }
 
     #[test]
     fn test_create_transaction() {
         let db = &mut db::connect().unwrap();
-        nuke(db);
+        db::nuke(db);
 
         let group = LineItemGroup::default();
         let li =
@@ -94,6 +88,6 @@ mod tests {
         let found_trans = transactions::table.first::<Transaction>(db).unwrap();
         assert_eq!(found_trans, trans);
 
-        nuke(db)
+        db::nuke(db)
     }
 }
