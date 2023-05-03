@@ -1,10 +1,13 @@
 mod line_item;
 mod schema;
 
+use crate::line_item::LineItem;
 use diesel::prelude::*;
 use dotenvy::dotenv;
 use log::*;
 use std::env;
+
+use crate::line_item::{LineItemKind, NewLineItem};
 
 type ID = i32;
 
@@ -23,12 +26,15 @@ fn main() {
     init_log();
 
     use self::schema::line_items::dsl::*;
-    use crate::line_item::LineItem;
 
     let db = &mut connect();
+
+    let line_item = LineItem::create(db, &LineItemKind::Standard, "Gas", &120.0, None);
+
     let results = line_items
-        .filter(balance.eq(0.0))
+        .filter(planned.eq(120.0))
         .limit(5)
         .load::<LineItem>(db)
         .expect("Error loading posts");
+    println!("{:?}", results);
 }

@@ -26,7 +26,7 @@ pub enum LineItemKind {
     Debt,
 }
 
-#[derive(Debug, Queryable, Identifiable, Insertable)]
+#[derive(Debug, Queryable, Identifiable)]
 #[diesel(table_name = line_items)]
 pub struct LineItem {
     pub id: ID,
@@ -37,6 +37,39 @@ pub struct LineItem {
     pub planned: f32,
     /// Balance is used for debts and funds, to carry over
     pub balance: Option<f32>,
+}
+
+impl LineItem {
+    /// Inserts a new line item into the DB
+    pub fn create(
+        conn: &mut PgConnection,
+        kind: &LineItemKind,
+        name: &str,
+        planned: &f32,
+        balance: Option<&f32>,
+    ) -> LineItem {
+        use crate::schema::line_items;
+        let new_line_item = NewLineItem {
+            kind,
+            name,
+            planned,
+            balance,
+        };
+
+        diesel::insert_into(line_items::table)
+            .values(&new_line_item)
+            .get_result(conn)
+            .expect("Couldn't insert")
+    }
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = line_items)]
+struct NewLineItem<'a> {
+    pub kind: &'a LineItemKind,
+    pub name: &'a str,
+    pub planned: &'a f32,
+    pub balance: Option<&'a f32>,
 }
 
 #[cfg(test)]
