@@ -1,4 +1,4 @@
-use crate::error::{BudgieError, Result};
+use crate::error::Result;
 use crate::schema::transactions;
 use diesel::prelude::*;
 
@@ -36,7 +36,7 @@ impl Transaction {
         diesel::insert_into(transactions::table)
             .values(&new_trans)
             .get_result(db)
-            .map_err(|e| BudgieError::from(e))
+            .map_err(|e| e.into())
     }
 }
 
@@ -56,6 +56,8 @@ mod tests {
     use super::*;
     use crate::db;
     use crate::model::LineItem;
+    use crate::model::LineItemGroup;
+    use crate::model::LineItemKind;
     use crate::schema::line_items;
     use crate::schema::transactions;
 
@@ -69,7 +71,9 @@ mod tests {
         let db = &mut db::connect().unwrap();
         nuke(db);
 
-        let li = LineItem::default();
+        let group = LineItemGroup::default();
+        let li =
+            LineItem::create(db, &LineItemKind::Standard, "Gas", &120.0, None, group.id).unwrap();
 
         let old_count = transactions::table.count().first::<i64>(db).unwrap();
         assert!(old_count == 0);

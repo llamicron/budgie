@@ -1,5 +1,3 @@
-#![allow(dead_code, unused)]
-
 //! Line items are the building blocks of a budget.
 //! Every line item has a type, Standard, Fund, or Debt.
 //!
@@ -13,10 +11,12 @@
 //! a starting balance of $500, and when it's used in a budget that sets is "planned" value
 //! to $75, it now has $575 in it.
 
-use crate::error::{BudgieError, Result};
+use crate::error::Result;
 use crate::schema::line_items;
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
+
+use super::LineItemGroup;
 
 #[derive(Debug, DbEnum, PartialEq)]
 #[ExistingTypePath = "crate::schema::sql_types::LineItemKind"]
@@ -37,6 +37,7 @@ pub struct LineItem {
     pub planned: f32,
     /// Balance is used for debts and funds, to carry over
     pub balance: Option<f32>,
+    pub group_id: i32,
 }
 
 impl LineItem {
@@ -47,27 +48,33 @@ impl LineItem {
         name: &str,
         planned: &f32,
         balance: Option<&f32>,
+        group_id: i32,
     ) -> Result<LineItem> {
         let new_line_item = NewLineItem {
             kind,
             name,
             planned,
             balance,
+            group_id,
         };
 
         diesel::insert_into(line_items::table)
             .values(&new_line_item)
             .get_result(conn)
-            .map_err(|e| BudgieError::from(e))
+            .map_err(|e| e.into())
     }
-}
 
-impl Default for LineItem {
-    /// Connects to the DB and inserts a new LineItem (in order to get the ID).
-    /// returns that line item
-    fn default() -> Self {
-        let mut db = crate::db::connect().expect("Couldn't connect to db to make Default LineItem");
-        LineItem::create(&mut db, &LineItemKind::Standard, "", &0.0, None).unwrap()
+    /// Moves a line item from it's current group to a new one
+    pub fn move_to_group(&mut self, db: &mut PgConnection, group: &LineItemGroup) -> Result<usize> {
+        use crate::schema::line_items::dsl::*;
+        let result = diesel::update(line_items)
+            .filter(id.eq(self.id))
+            .set(group_id.eq(group.id))
+            .execute(db)
+            .map_err(|e| e.into());
+
+        self.group_id = group.id;
+        result
     }
 }
 
@@ -78,16 +85,19 @@ struct NewLineItem<'a> {
     pub name: &'a str,
     pub planned: &'a f32,
     pub balance: Option<&'a f32>,
+    pub group_id: i32,
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::db;
-    use crate::schema::line_items;
+    use crate::model::LineItemGroup;
+    use crate::schema::{line_item_groups, line_items};
 
     fn nuke(db: &mut PgConnection) {
         diesel::delete(line_items::table).execute(db).unwrap();
+        diesel::delete(line_item_groups::table).execute(db).unwrap();
     }
 
     #[test]
@@ -95,15 +105,35 @@ mod tests {
         let db = &mut db::connect().unwrap();
         nuke(db);
 
+        let group = LineItemGroup::default();
+
         let old_count = line_items::table.count().first::<i64>(db).unwrap();
         assert_eq!(old_count, 0);
-        LineItem::create(db, &LineItemKind::Standard, "Gas", &120.0, None);
+        LineItem::create(db, &LineItemKind::Standard, "Gas", &120.0, None, group.id).unwrap();
         let new_count = line_items::table.count().first::<i64>(db).unwrap();
         assert_eq!(new_count, 1);
 
         let li_it = line_items::table.first::<LineItem>(db).unwrap();
         assert_eq!(li_it.name, "Gas");
 
+        nuke(db);
+    }
+
+    #[test]
+    fn test_move_group() {
+        let db = &mut db::connect().unwrap();
+        nuke(db);
+        let group1 = LineItemGroup::default();
+        let group2 = LineItemGroup::default();
+
+        assert_ne!(group1.id, group2.id);
+
+        let mut line_item =
+            LineItem::create(db, &LineItemKind::Standard, "Gas", &120.0, None, group1.id).unwrap();
+
+        assert_eq!(line_item.group_id, group1.id);
+        line_item.move_to_group(db, &group2).unwrap();
+        assert_eq!(line_item.group_id, group2.id);
         nuke(db);
     }
 }

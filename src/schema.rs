@@ -7,6 +7,13 @@ pub mod sql_types {
 }
 
 diesel::table! {
+    line_item_groups (id) {
+        id -> Int4,
+        name -> Text,
+    }
+}
+
+diesel::table! {
     use diesel::sql_types::*;
     use super::sql_types::LineItemKind;
 
@@ -16,6 +23,7 @@ diesel::table! {
         name -> Varchar,
         planned -> Float4,
         balance -> Nullable<Float4>,
+        group_id -> Int4,
     }
 }
 
@@ -31,9 +39,11 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(line_items -> line_item_groups (group_id));
 diesel::joinable!(transactions -> line_items (line_item_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    line_item_groups,
     line_items,
     transactions,
 );
