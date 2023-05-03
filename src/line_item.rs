@@ -62,6 +62,15 @@ impl LineItem {
     }
 }
 
+impl Default for LineItem {
+    /// Connects to the DB and inserts a new LineItem (in order to get the ID).
+    /// returns that line item
+    fn default() -> Self {
+        let mut db = crate::db::connect().expect("Couldn't connect to db to make Default LineItem");
+        LineItem::create(&mut db, &LineItemKind::Standard, "", &0.0, None).unwrap()
+    }
+}
+
 #[derive(Insertable)]
 #[diesel(table_name = line_items)]
 struct NewLineItem<'a> {
