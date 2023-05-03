@@ -13,3 +13,7 @@ dotenvy = "0.15.7"
 diesel-derive-enum = { version = "2.0.1", features = ["postgres"] }
 log = "*"
 env_logger = "*"
+
+
+[dev-dependencies]
+ctor = "*"

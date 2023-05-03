@@ -14,8 +14,7 @@
 //! to $75, it now has $575 in it.
 
 use crate::schema::line_items;
-use crate::ID;
-use diesel::{prelude::*, AsExpression};
+use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
 
 #[derive(Debug, DbEnum)]
@@ -29,7 +28,7 @@ pub enum LineItemKind {
 #[derive(Debug, Queryable, Identifiable)]
 #[diesel(table_name = line_items)]
 pub struct LineItem {
-    pub id: ID,
+    pub id: i32,
     pub kind: LineItemKind,
     pub name: String,
     /// The planned amount for a certain budget.
@@ -48,7 +47,6 @@ impl LineItem {
         planned: &f32,
         balance: Option<&f32>,
     ) -> LineItem {
-        use crate::schema::line_items;
         let new_line_item = NewLineItem {
             kind,
             name,
@@ -75,4 +73,27 @@ struct NewLineItem<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::db;
+    use crate::schema::line_items::dsl::*;
+
+    fn nuke(db: &mut PgConnection) {
+        diesel::delete(line_items).execute(db).unwrap();
+    }
+
+    #[test]
+    fn test_insert_new_line_item() {
+        let db = &mut db::connect();
+        nuke(db);
+
+        let old_count = line_items.count().first::<i64>(db).unwrap();
+        assert!(old_count == 0);
+        LineItem::create(db, &LineItemKind::Standard, "Gas", &120.0, None);
+        let new_count = line_items.count().first::<i64>(db).unwrap();
+        assert!(new_count == 1);
+
+        let li_it = line_items.first::<LineItem>(db).unwrap();
+        assert!(li_it.name == "Gas");
+
+        nuke(db);
+    }
 }
