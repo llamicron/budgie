@@ -1,6 +1,8 @@
 mod db;
+mod error;
 mod line_item;
 mod schema;
+mod transaction;
 
 use dotenvy::dotenv;
 

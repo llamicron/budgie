@@ -18,3 +18,22 @@ diesel::table! {
         balance -> Nullable<Float4>,
     }
 }
+
+diesel::table! {
+    transactions (id) {
+        id -> Int4,
+        line_item_id -> Int4,
+        is_expense -> Bool,
+        amount -> Float4,
+        merchant -> Text,
+        notes -> Nullable<Text>,
+        date -> Timestamp,
+    }
+}
+
+diesel::joinable!(transactions -> line_items (line_item_id));
+
+diesel::allow_tables_to_appear_in_same_query!(
+    line_items,
+    transactions,
+);
