@@ -35,7 +35,7 @@ diesel::table! {
         amount -> Float4,
         merchant -> Text,
         notes -> Nullable<Text>,
-        date -> Timestamp,
+        date -> Date,
     }
 }
 

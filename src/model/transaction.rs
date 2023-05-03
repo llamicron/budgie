@@ -11,7 +11,7 @@ pub struct Transaction {
     pub amount: f32,
     pub merchant: String,
     pub notes: Option<String>,
-    pub date: chrono::NaiveDateTime,
+    pub date: chrono::NaiveDate,
 }
 
 impl Transaction {
@@ -22,7 +22,7 @@ impl Transaction {
         amount: &f32,
         merchant: &str,
         notes: Option<&str>,
-        date: chrono::NaiveDateTime,
+        date: chrono::NaiveDate,
     ) -> Result<Self> {
         let new_trans = NewTransaction {
             line_item_id,
@@ -48,7 +48,7 @@ pub struct NewTransaction<'a> {
     amount: &'a f32,
     merchant: &'a str,
     notes: Option<&'a str>,
-    date: chrono::NaiveDateTime,
+    date: chrono::NaiveDate,
 }
 
 #[cfg(test)]
@@ -78,7 +78,7 @@ mod tests {
             &20.58,
             "Exxon",
             None,
-            chrono::NaiveDateTime::default(),
+            chrono::NaiveDate::default(),
         )
         .unwrap();
 
