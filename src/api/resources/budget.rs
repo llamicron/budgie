@@ -1,7 +1,7 @@
 //! API routes related to budgets
 
 use crate::{db::DbPool, error::BudgieError};
-use actix_web::{get, web, HttpResponse, Responder, Scope};
+use actix_web::{web, Responder};
 use diesel::prelude::*;
 
 pub async fn get_budget(
