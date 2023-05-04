@@ -15,10 +15,11 @@ use crate::error::Result;
 use crate::schema::line_items;
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
+use serde::{Deserialize, Serialize};
 
 use super::LineItemGroup;
 
-#[derive(Debug, DbEnum, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, DbEnum, PartialEq, Clone)]
 #[ExistingTypePath = "crate::schema::sql_types::LineItemKind"]
 pub enum LineItemKind {
     Standard,
@@ -26,7 +27,7 @@ pub enum LineItemKind {
     Debt,
 }
 
-#[derive(Debug, Queryable, Identifiable, PartialEq)]
+#[derive(Debug, Queryable, Serialize, Identifiable, PartialEq, Clone)]
 #[diesel(table_name = line_items)]
 pub struct LineItem {
     pub id: i32,
