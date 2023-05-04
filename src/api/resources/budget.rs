@@ -3,16 +3,15 @@
 use crate::model;
 use crate::schema::budgets::{self, dsl::*};
 use crate::{db::DbPool, error::BudgieError};
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{web, Responder};
 use chrono::NaiveDate;
 use diesel::prelude::*;
 use serde::Deserialize;
 
+type Result = std::result::Result<web::Json<model::Budget>, BudgieError>;
+
 /// Finds a budget by ID if it exists
-pub async fn get_budget(
-    path: web::Path<i32>,
-    db: web::Data<DbPool>,
-) -> Result<impl Responder, BudgieError> {
+pub async fn get_budget(path: web::Path<i32>, db: web::Data<DbPool>) -> Result {
     let budget_id = path.into_inner();
 
     let mut db_conn = db.conns.lock().unwrap().get().unwrap();
@@ -42,10 +41,7 @@ pub struct NewBudgetPayload {
     pub notes: Option<String>,
 }
 
-pub async fn new_budget(
-    new_budget: web::Json<NewBudgetPayload>,
-    db: web::Data<DbPool>,
-) -> Result<web::Json<model::Budget>, BudgieError> {
+pub async fn new_budget(new_budget: web::Json<NewBudgetPayload>, db: web::Data<DbPool>) -> Result {
     let new = new_budget.into_inner();
     let conn = &mut db.conns.lock().unwrap().get().unwrap();
     let created = model::Budget::create(
@@ -62,7 +58,7 @@ pub async fn update_budget(
     path: web::Path<i32>,
     update_budget: web::Json<NewBudgetPayload>,
     db: web::Data<DbPool>,
-) -> Result<web::Json<model::Budget>, BudgieError> {
+) -> Result {
     let new = update_budget.into_inner();
     let budget_id = path.into_inner();
     let conn = &mut db.conns.lock().unwrap().get().unwrap();
@@ -75,11 +71,21 @@ pub async fn update_budget(
     Ok(web::Json(result))
 }
 
+pub async fn delete_budget(path: web::Path<i32>, db: web::Data<DbPool>) -> Result {
+    let budget_id = path.into_inner();
+    let conn = &mut db.conns.lock().unwrap().get().unwrap();
+
+    let result =
+        diesel::delete(budgets.filter(id.eq(budget_id))).get_result::<model::Budget>(conn)?;
+    Ok(web::Json(result))
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::resource("/budget/{budget_id}")
             .route(web::get().to(get_budget))
-            .route(web::post().to(update_budget)),
+            .route(web::post().to(update_budget))
+            .route(web::delete().to(delete_budget)),
     )
     .service(web::resource("/budget").route(web::post().to(new_budget)));
 }
