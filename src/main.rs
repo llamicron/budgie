@@ -1,3 +1,4 @@
+mod api;
 mod db;
 mod error;
 mod model;
@@ -12,6 +13,8 @@ fn init_log() {
 fn main() {
     dotenv().ok();
     init_log();
+
+    api::start().unwrap();
 }
 
 #[cfg(test)]
