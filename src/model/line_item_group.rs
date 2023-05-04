@@ -1,8 +1,9 @@
 use crate::error::Result;
 use crate::schema::line_item_groups;
 use diesel::prelude::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Queryable)]
+#[derive(Debug, Clone, Serialize, Queryable)]
 #[diesel(table_name = line_item_groups)]
 pub struct LineItemGroup {
     pub id: i32,
@@ -21,7 +22,7 @@ impl LineItemGroup {
     }
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Deserialize)]
 #[diesel(table_name = line_item_groups)]
 pub struct NewLineItemGroup<'a> {
     budget_id: i32,

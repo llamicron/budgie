@@ -48,7 +48,8 @@ pub async fn start() -> std::io::Result<()> {
                     .service(health_check)
                     .service(ping)
                     .service(forced_error)
-                    .configure(resources::budget::routes),
+                    .configure(resources::budget::routes)
+                    .configure(resources::line_item_groups::routes),
             )
     })
     .bind(("127.0.0.1", 8080))?
