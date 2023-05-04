@@ -20,6 +20,7 @@ diesel::table! {
     line_item_groups (id) {
         id -> Int4,
         name -> Text,
+        budget_id -> Int4,
     }
 }
 
@@ -49,6 +50,7 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(line_item_groups -> budgets (budget_id));
 diesel::joinable!(line_items -> line_item_groups (group_id));
 diesel::joinable!(transactions -> line_items (line_item_id));
 

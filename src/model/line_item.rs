@@ -90,9 +90,11 @@ struct NewLineItem<'a> {
 
 #[cfg(test)]
 mod tests {
+    use chrono::NaiveDate;
+
     use super::*;
     use crate::db;
-    use crate::model::LineItemGroup;
+    use crate::model::{Budget, LineItemGroup};
     use crate::schema::line_items;
 
     #[test]
@@ -100,7 +102,16 @@ mod tests {
         let db = &mut db::connect().unwrap();
         db::nuke(db);
 
-        let group = LineItemGroup::default();
+        let budget = Budget::create(
+            db,
+            NaiveDate::from_ymd_opt(2023, 5, 1).unwrap(),
+            NaiveDate::from_ymd_opt(2023, 5, 31).unwrap(),
+            "May Budget",
+            None,
+        )
+        .unwrap();
+
+        let group = LineItemGroup::create(db, budget.id, "New Group").unwrap();
 
         let old_count = line_items::table.count().first::<i64>(db).unwrap();
         assert_eq!(old_count, 0);
@@ -118,8 +129,18 @@ mod tests {
     fn test_move_group() {
         let db = &mut db::connect().unwrap();
         db::nuke(db);
-        let group1 = LineItemGroup::default();
-        let group2 = LineItemGroup::default();
+
+        let budget = Budget::create(
+            db,
+            NaiveDate::from_ymd_opt(2023, 5, 1).unwrap(),
+            NaiveDate::from_ymd_opt(2023, 5, 31).unwrap(),
+            "May Budget",
+            None,
+        )
+        .unwrap();
+
+        let group1 = LineItemGroup::create(db, budget.id, "New Group").unwrap();
+        let group2 = LineItemGroup::create(db, budget.id, "New Group").unwrap();
 
         assert_ne!(group1.id, group2.id);
 

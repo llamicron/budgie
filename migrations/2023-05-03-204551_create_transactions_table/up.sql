@@ -5,5 +5,5 @@ CREATE TABLE transactions (
     amount REAL NOT NULL,
     merchant TEXT NOT NULL,
     notes TEXT,
-    date TIMESTAMP NOT NULL
+    date DATE NOT NULL
 );

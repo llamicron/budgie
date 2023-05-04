@@ -53,8 +53,11 @@ pub struct NewTransaction<'a> {
 
 #[cfg(test)]
 mod tests {
+    use chrono::NaiveDate;
+
     use super::*;
     use crate::db;
+    use crate::model::Budget;
     use crate::model::LineItem;
     use crate::model::LineItemGroup;
     use crate::model::LineItemKind;
@@ -65,7 +68,16 @@ mod tests {
         let db = &mut db::connect().unwrap();
         db::nuke(db);
 
-        let group = LineItemGroup::default();
+        let budget = Budget::create(
+            db,
+            NaiveDate::from_ymd_opt(2023, 5, 1).unwrap(),
+            NaiveDate::from_ymd_opt(2023, 5, 31).unwrap(),
+            "May Budget",
+            None,
+        )
+        .unwrap();
+
+        let group = LineItemGroup::create(db, budget.id, "New Group").unwrap();
         let li =
             LineItem::create(db, &LineItemKind::Standard, "Gas", &120.0, None, group.id).unwrap();
 
