@@ -1,8 +1,9 @@
 use crate::error::Result;
 use crate::schema::transactions;
 use diesel::prelude::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Queryable, Identifiable, PartialEq)]
+#[derive(Debug, Clone, Serialize, Queryable, Identifiable, PartialEq)]
 #[diesel(table_name = transactions)]
 pub struct Transaction {
     pub id: i32,

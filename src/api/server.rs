@@ -21,7 +21,8 @@ pub async fn start() -> std::io::Result<()> {
                     .service(health_check)
                     .configure(resources::budget::routes)
                     .configure(resources::line_item_group::routes)
-                    .configure(resources::line_item::routes),
+                    .configure(resources::line_item::routes)
+                    .configure(resources::transactions::routes),
             )
     })
     .bind(("127.0.0.1", 8080))?
