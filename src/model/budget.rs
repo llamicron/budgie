@@ -34,6 +34,13 @@ impl Budget {
             .get_result(db)
             .map_err(|e| e.into())
     }
+
+    pub fn create_from(db: &mut PgConnection, new_budget: NewBudget) -> Result<Budget> {
+        diesel::insert_into(budgets::table)
+            .values(&new_budget)
+            .get_result(db)
+            .map_err(|e| e.into())
+    }
 }
 
 #[derive(Insertable)]
