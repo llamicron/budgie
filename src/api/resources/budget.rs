@@ -21,11 +21,11 @@ pub async fn get_budget(
         .load::<Budget>(&mut db_conn)?;
 
     if let Some(budget) = results.get(0) {
-        return Ok(web::Json(budget.clone()));
+        Ok(web::Json(budget.clone()))
     } else {
-        return Err(
-            BudgieError::ResourceNotFound(format!("Budget with id {budget_id} not found")).into(),
-        );
+        Err(BudgieError::ResourceNotFound(format!(
+            "Budget with id {budget_id} not found"
+        )))
     }
 }
 

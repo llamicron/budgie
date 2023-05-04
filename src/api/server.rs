@@ -30,8 +30,9 @@ async fn ping(ping_pong: web::Json<PingPong>) -> Result<impl Responder> {
 
 #[get("/error")]
 async fn forced_error() -> Result<&'static str, UserError> {
-    let err = UserError::CustomError(String::from("an (expected) error occured"));
-    Err(err.into())
+    Err(UserError::CustomError(String::from(
+        "an (expected) error occured",
+    )))
 }
 
 #[actix_web::main]
