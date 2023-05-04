@@ -2,8 +2,9 @@ use crate::error::Result;
 use crate::schema::budgets;
 use chrono::NaiveDate;
 use diesel::prelude::*;
+use serde::Serialize;
 
-#[derive(Debug, Queryable, Identifiable)]
+#[derive(Debug, Clone, Serialize, Queryable, Identifiable)]
 #[diesel(table_name = budgets)]
 pub struct Budget {
     pub id: i32,
