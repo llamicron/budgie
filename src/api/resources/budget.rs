@@ -3,6 +3,7 @@
 use super::Result;
 use crate::model;
 use crate::schema::budgets::{self, dsl::*};
+use crate::schema::line_item_groups;
 use crate::{db::DbPool, error::BudgieError};
 
 use actix_web::web;
@@ -83,6 +84,21 @@ pub async fn delete_budget(path: web::Path<i32>, db: web::Data<DbPool>) -> Resul
     Ok(web::Json(result))
 }
 
+pub async fn get_line_item_groups(
+    path: web::Path<i32>,
+    db: web::Data<DbPool>,
+) -> Result<Vec<model::LineItemGroup>> {
+    use crate::schema::line_item_groups::dsl::*;
+    let bud_id = path.into_inner();
+    let conn = &mut db.conns.lock().unwrap().get().unwrap();
+
+    let groups = line_item_groups
+        .filter(budget_id.eq(bud_id))
+        .get_results(conn)?;
+
+    Ok(web::Json(groups))
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::resource("/budget/{budget_id}")
@@ -90,5 +106,9 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
             .route(web::post().to(update_budget))
             .route(web::delete().to(delete_budget)),
     )
-    .service(web::resource("/budget").route(web::post().to(new_budget)));
+    .service(web::resource("/budget").route(web::post().to(new_budget)))
+    .service(
+        web::resource("/budget/{budget_id}/line_item_groups")
+            .route(web::get().to(get_line_item_groups)),
+    );
 }
