@@ -74,6 +74,19 @@ pub async fn delete_line_item_group(
     Ok(web::Json(result))
 }
 
+pub async fn get_line_items(
+    path: web::Path<i32>,
+    db: web::Data<DbPool>,
+) -> Result<Vec<model::LineItem>> {
+    use crate::schema::line_items::dsl::*;
+    let g_id = path.into_inner();
+    let conn = &mut db.conns.lock().unwrap().get().unwrap();
+
+    let lis = line_items.filter(group_id.eq(g_id)).get_results(conn)?;
+
+    Ok(web::Json(lis))
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::resource("/line_item_group/{group_id}")
@@ -81,5 +94,9 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
             .route(web::post().to(update_line_item_group))
             .route(web::delete().to(delete_line_item_group)),
     )
-    .service(web::resource("/line_item_group").route(web::post().to(new_line_item_group)));
+    .service(web::resource("/line_item_group").route(web::post().to(new_line_item_group)))
+    .service(
+        web::resource("/line_item_group/{group_id}/line_items")
+            .route(web::get().to(get_line_items)),
+    );
 }

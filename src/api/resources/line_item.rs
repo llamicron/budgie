@@ -82,6 +82,21 @@ pub async fn delete_line_item(
     Ok(web::Json(result))
 }
 
+pub async fn get_transactions(
+    path: web::Path<i32>,
+    db: web::Data<DbPool>,
+) -> Result<Vec<model::Transaction>> {
+    use crate::schema::transactions::dsl::*;
+    let li_id = path.into_inner();
+    let conn = &mut db.conns.lock().unwrap().get().unwrap();
+
+    let trans = transactions
+        .filter(line_item_id.eq(li_id))
+        .get_results(conn)?;
+
+    Ok(web::Json(trans))
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::resource("/line_item/{line_item}")
@@ -89,5 +104,9 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
             .route(web::post().to(update_line_item))
             .route(web::delete().to(delete_line_item)),
     )
-    .service(web::resource("/line_item").route(web::post().to(new_line_item)));
+    .service(web::resource("/line_item").route(web::post().to(new_line_item)))
+    .service(
+        web::resource("/line_item/{line_item_id}/transactions")
+            .route(web::get().to(get_transactions)),
+    );
 }
